@@ -1,16 +1,15 @@
 version: '3.1'
 services:
   stats-server:
-    build: stats
-    image: explore_with_me_stats
-    container_name: explore_with_me_stats
+    build: ./stats
+    image: stats
+    container_name: stats
     ports:
       - "9090:9090"
     depends_on:
       - stats-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/EXPLORE_WITH_ME_STATS
-      - DB_NAME=EXPLORE_WITH_ME_STATS
+      - DB_NAME=stats-db
       - POSTGRES_USER=explore
       - POSTGRES_PASSWORD=explore
       - DB_HOST=db
@@ -18,25 +17,24 @@ services:
 
   stats-db:
     image: postgres:14-alpine
-    container_name: explore_with-me_stats_db
+    container_name: stats-db
     ports:
       - "6541:5432"
     environment:
-      - POSTGRES_DB=EXPLORE_WITH_ME_STATS
+      - POSTGRES_DB=stats-db
       - POSTGRES_USER=explore
       - POSTGRES_PASSWORD=explore
 
   ewm-service:
-    build: main
-    image: explore_with_me_main
-    container_name: explore_with_me_main
+    build: ./main
+    image: main
+    container_name: main
     ports:
       - "8080:8080"
     depends_on:
       - ewm-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5442/EXPLORE_WITH_ME_MAIN
-      - DB_NAME=EXPLORE_WITH_ME_MAIN
+      - DB_NAME=ewm-db
       - POSTGRES_USER=explore
       - POSTGRES_PASSWORD=explore
       - DB_HOST=db
@@ -44,10 +42,10 @@ services:
 
   ewm-db:
     image: postgres:14-alpine
-    container_name: explore_with-me_main_db
+    container_name: ewm-db
     ports:
-      - "5541:5432"
+      - "6540:5432"
     environment:
-      - POSTGRES_DB=EXPLORE_WITH_ME_MAIN
+      - POSTGRES_DB=ewm-db
       - POSTGRES_USER=explore
       - POSTGRES_PASSWORD=explore

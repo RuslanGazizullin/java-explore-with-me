@@ -57,5 +57,4 @@ CREATE TABLE IF NOT EXISTS compilations_events
 (
     compilation BIGINT REFERENCES compilations (id) NOT NULL,
     event       BIGINT REFERENCES events (id)       NOT NULL
-)
-
+);

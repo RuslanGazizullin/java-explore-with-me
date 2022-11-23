@@ -25,5 +25,6 @@ public class ParticipationRequest {
     @Column(name = "requester")
     private Long requester;
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private RequestStatus status;
 }

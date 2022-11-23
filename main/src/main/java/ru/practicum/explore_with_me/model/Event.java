@@ -43,5 +43,6 @@ public class Event {
     @Column(name = "title")
     private String title;
     @Column(name = "state")
+    @Enumerated(EnumType.STRING)
     private EventState state;
 }

@@ -12,6 +12,7 @@ import ru.practicum.explore_with_me.repository.StatsRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ public class StatsController {
 
     private final StatsRepository statsRepository;
     private final HitsMapper hitsMapper;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @PostMapping("/hit")
     public void add(@RequestBody EndpointHit endpointHit) {
@@ -34,11 +35,12 @@ public class StatsController {
     @GetMapping("/stats")
     public List<ViewStats> findAll(@RequestParam String start,
                                    @RequestParam String end,
-                                   @RequestParam(defaultValue = "[]") List<String> uris,
+                                   @RequestParam List<String> uris,
                                    @RequestParam(defaultValue = "false") Boolean unique) {
-        List<Hits> hits = statsRepository.findAll(LocalDateTime.parse(start, formatter),
-                LocalDateTime.parse(end, formatter),
-                uris);
+        List<Hits> hits = statsRepository.findAll(
+                LocalDateTime.parse(start, FORMATTER),
+                LocalDateTime.parse(end, FORMATTER),
+                uris == null ? Collections.emptyList() : uris);
         if (unique) {
             List<Hits> uniqueHits = new ArrayList<>();
             List<String> uniqueIps = hits.stream().map(Hits::getIp).distinct().collect(Collectors.toList());

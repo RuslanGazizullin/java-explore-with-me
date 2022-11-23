@@ -30,6 +30,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public List<CompilationDto> findAll(Boolean pinned, Integer from, Integer size) {
+        log.info("All compilations found, pinned = {}", pinned);
         return compilationRepository.findAllByPinned(PageRequest.of(from / size, size), pinned)
                 .stream()
                 .map(compilationMapper::toCompilationDto)
@@ -39,11 +40,13 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto findById(Long compId) {
         compilationValidation.compilationIdValidation(compId);
+        log.info("Compilation id {} found", compId);
         return compilationMapper.toCompilationDto(compilationRepository.findById(compId).get());
     }
 
     @Override
     public CompilationDto add(NewCompilationDto newCompilationDto) {
+        log.info("Compilation added");
         return compilationMapper.toCompilationDto(compilationRepository.save(compilationMapper
                 .fromNewCompilationDto(newCompilationDto)));
     }
@@ -51,6 +54,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void deleteById(Long compId) {
         compilationValidation.compilationIdValidation(compId);
+        log.info("Compilation id {} deleted", compId);
         compilationRepository.deleteById(compId);
     }
 
@@ -62,6 +66,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId).get();
         compilation.getEvents().remove(event);
         compilationRepository.save(compilation);
+        log.info("Event id {} deleted from compilation id {}", eventId, compId);
     }
 
     @Override
@@ -72,6 +77,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId).get();
         compilation.getEvents().add(event);
         compilationRepository.save(compilation);
+        log.info("Event id {} added to compilation id {}", eventId, compId);
     }
 
     @Override
@@ -80,6 +86,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId).get();
         compilation.setPinned(true);
         compilationRepository.save(compilation);
+        log.info("Compilation id {} pinned", compId);
     }
 
     @Override
@@ -88,5 +95,6 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId).get();
         compilation.setPinned(false);
         compilationRepository.save(compilation);
+        log.info("Compilation id {} unpinned", compId);
     }
 }

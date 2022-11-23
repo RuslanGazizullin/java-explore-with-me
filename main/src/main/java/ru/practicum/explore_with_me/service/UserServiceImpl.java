@@ -24,17 +24,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto add(NewUserDto newUserDto) {
+        log.info("User added");
         return userMapper.toUserDto(userRepository.save(userMapper.fromNewUserDto(newUserDto)));
     }
 
     @Override
     public void deleteById(Long userId) {
         userValidation.userIdValidation(userId);
+        log.info("User id {} deleted", userId);
         userRepository.deleteById(userId);
     }
 
     @Override
     public List<UserDto> findAll(List<Long> ids, Integer from, Integer size) {
+        log.info("All users found");
         if (ids == null) {
             return userRepository.findAll(PageRequest.of(from / size, size))
                     .stream()

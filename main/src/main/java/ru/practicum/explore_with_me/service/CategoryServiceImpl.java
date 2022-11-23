@@ -24,6 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> findAll(Integer from, Integer size) {
+        log.info("All categories found");
         return categoryRepository.findAll(PageRequest.of(from / size, size))
                 .stream()
                 .map(categoryMapper::toCategoryDto)
@@ -33,17 +34,20 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto findById(Long catId) {
         categoryValidation.categoryIdValidation(catId);
+        log.info("Category id {} found", catId);
         return categoryMapper.toCategoryDto(categoryRepository.findById(catId).get());
     }
 
     @Override
     public CategoryDto add(NewCategoryDto newCategoryDto) {
+        log.info("Category added");
         return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.fromNewCategoryDto(newCategoryDto)));
     }
 
     @Override
     public CategoryDto update(CategoryDto categoryDto) {
         categoryValidation.categoryIdValidation(categoryDto.getId());
+        log.info("Category id {} updated", categoryDto.getId());
         return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.fromCategoryDto(categoryDto)));
     }
 
@@ -51,6 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteById(Long catId) {
         categoryValidation.categoryIdValidation(catId);
         categoryValidation.categoryContainsEventsValidation(catId);
+        log.info("Category id {} deleted", catId);
         categoryRepository.deleteById(catId);
     }
 }

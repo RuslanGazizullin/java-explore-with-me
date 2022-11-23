@@ -39,13 +39,13 @@ public class PublicController {
                                              @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                              @Positive @RequestParam(defaultValue = "100") Integer size,
                                              HttpServletRequest request) {
-        statsClient.addStats(request.getRemoteAddr(), request.getRequestURI());
+        statsClient.addStats(request.getRequestURI(), request.getRemoteAddr());
         return eventService.findAll(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
     }
 
     @GetMapping("/events/{id}")
     public EventFullDto findEventById(@PathVariable Long id, HttpServletRequest request) {
-        statsClient.addStats(request.getRemoteAddr(), request.getRequestURI());
+        statsClient.addStats(request.getRequestURI(), request.getRemoteAddr());
         return eventService.findById(id);
     }
 

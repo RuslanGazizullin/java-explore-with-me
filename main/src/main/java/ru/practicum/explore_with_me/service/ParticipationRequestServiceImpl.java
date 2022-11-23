@@ -32,6 +32,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<ParticipationRequestDto> findAllByUserByEvent(Long userId, Long eventId) {
         eventValidation.eventInitiatorValidation(eventId, userId);
+        log.info("All requests to event id {} found", eventId);
         return participationRequestRepository.findAll()
                 .stream()
                 .filter(participationRequest -> participationRequest.getEvent().equals(eventId))
@@ -54,6 +55,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ValidationException("Participant limit reached");
         } else {
             participationRequest.setStatus(RequestStatus.CONFIRMED);
+            log.info("Request id {} to event id {} confirmed", reqId, eventId);
             return participationRequestMapper.toParticipationRequestDto(participationRequestRepository
                     .save(participationRequest));
         }
@@ -65,6 +67,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         ParticipationRequest participationRequest = participationRequestRepository.findById(reqId).get();
         participationRequestValidation.userIsRequesterValidation(userId, participationRequest.getRequester());
         participationRequest.setStatus(RequestStatus.REJECTED);
+        log.info("Request id {} to event id {} rejected", reqId, eventId);
         return participationRequestMapper.toParticipationRequestDto(participationRequestRepository
                 .save(participationRequest));
     }
@@ -72,6 +75,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<ParticipationRequestDto> findAll(Long userId) {
         List<Long> userEventsId = eventRepository.findAllIdByInitiator(userId);
+        log.info("All requests found");
         return participationRequestRepository.findAllByRequester(userId)
                 .stream()
                 .filter(participationRequest -> !userEventsId.contains(participationRequest.getEvent()))
@@ -91,6 +95,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 .status(!eventRepository.findById(eventId).get()
                         .getRequestModeration() ? RequestStatus.CONFIRMED : RequestStatus.PENDING)
                 .build();
+        log.info("Request to event id {} added", eventId);
         return participationRequestMapper.toParticipationRequestDto(participationRequestRepository
                 .save(participationRequest));
     }
@@ -100,6 +105,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         ParticipationRequest participationRequest = participationRequestRepository.findById(requestId).get();
         participationRequestValidation.userIsNotRequesterValidation(userId, participationRequest.getRequester());
         participationRequest.setStatus(RequestStatus.CANCELED);
+        log.info("Request id {} canceled by user id {}", requestId, userId);
         return participationRequestMapper.toParticipationRequestDto(participationRequestRepository
                 .save(participationRequest));
     }

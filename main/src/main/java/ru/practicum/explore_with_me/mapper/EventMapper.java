@@ -12,6 +12,7 @@ import ru.practicum.explore_with_me.repository.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Component
@@ -134,11 +135,11 @@ public class EventMapper {
 
     private Integer getViews(Long eventId) {
         ResponseEntity<Object> response = statsClient.getStats(
-                "0",
+                LocalDateTime.of(1970, 1, 1, 0, 0, 0).format(FORMATTER),
                 LocalDateTime.now().format(FORMATTER),
-                List.of("events" + eventId),
+                List.of("", "/events/" + eventId, ""),
                 false);
-        List<ViewStats> stats = (List<ViewStats>) response.getBody();
-        return stats.get(0).getHits();
+        List<LinkedHashMap<String, Object>> stats = (List<LinkedHashMap<String, Object>>) response.getBody();
+        return stats.size() == 0 ? 0 : (Integer) stats.get(0).get("hits");
     }
 }

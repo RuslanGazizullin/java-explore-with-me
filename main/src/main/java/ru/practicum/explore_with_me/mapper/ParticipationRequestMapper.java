@@ -9,12 +9,12 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class ParticipationRequestMapper {
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public ParticipationRequestDto toParticipationRequestDto(ParticipationRequest participationRequest) {
         return ParticipationRequestDto.builder()
                 .id(participationRequest.getId())
-                .created(participationRequest.getCreated().format(formatter))
+                .created(participationRequest.getCreated().format(FORMATTER))
                 .event(participationRequest.getEvent())
                 .requester(participationRequest.getRequester())
                 .status(participationRequest.getStatus())
@@ -24,7 +24,7 @@ public class ParticipationRequestMapper {
     public ParticipationRequest fromParticipationRequestDto(ParticipationRequestDto participationRequestDto) {
         return ParticipationRequest.builder()
                 .id(participationRequestDto.getId())
-                .created(LocalDateTime.parse(participationRequestDto.getCreated(), formatter))
+                .created(LocalDateTime.parse(participationRequestDto.getCreated(), FORMATTER))
                 .event(participationRequestDto.getEvent())
                 .requester(participationRequestDto.getRequester())
                 .status(participationRequestDto.getStatus())

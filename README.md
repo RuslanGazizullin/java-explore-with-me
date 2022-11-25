@@ -14,5 +14,6 @@ API основного сервиса разделён на три части. �
 
 Запуск приложения происходит из командной строки командой docker-compose up.
 
-Схема базы данных основного сервиса: https://github.com/RuslanGazizullin/java-explore-with-me/blob/develop/main%20service%20DB%20schema.png
-Схема базы данных сервиса статистики: https://github.com/RuslanGazizullin/java-explore-with-me/blob/develop/stats%20service%20DB%20schema.png
+Схема базы данных основного сервиса: ![main service DB schema](https://user-images.githubusercontent.com/97000877/204021013-437f6bb7-d839-4d55-b1c4-c73396106862.png)
+
+Схема базы данных сервиса статистики: ![stats service DB schema](https://user-images.githubusercontent.com/97000877/204021037-84e3618a-9c43-4819-9c33-7adf6aaebf9e.png)

@@ -1,11 +1,13 @@
 package ru.practicum.explore_with_me.validation;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.explore_with_me.exception.NotFoundException;
 import ru.practicum.explore_with_me.exception.ValidationException;
 import ru.practicum.explore_with_me.model.ParticipationRequest;
 import ru.practicum.explore_with_me.repository.ParticipationRequestRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ParticipationRequestValidation {
@@ -14,6 +16,14 @@ public class ParticipationRequestValidation {
 
     public ParticipationRequestValidation(ParticipationRequestRepository participationRequestRepository) {
         this.participationRequestRepository = participationRequestRepository;
+    }
+
+    public ParticipationRequest requestIdValidation(Long reqId) {
+        Optional<ParticipationRequest> participationRequest = participationRequestRepository.findById(reqId);
+        if (participationRequest.isEmpty()) {
+            throw new NotFoundException("Participation request not found");
+        }
+        return participationRequest.get();
     }
 
     public void userIsRequesterValidation(Long userId, Long requesterId) {

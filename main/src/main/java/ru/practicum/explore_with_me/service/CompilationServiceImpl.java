@@ -10,7 +10,6 @@ import ru.practicum.explore_with_me.mapper.CompilationMapper;
 import ru.practicum.explore_with_me.model.Compilation;
 import ru.practicum.explore_with_me.model.Event;
 import ru.practicum.explore_with_me.repository.CompilationRepository;
-import ru.practicum.explore_with_me.repository.EventRepository;
 import ru.practicum.explore_with_me.validation.CompilationValidation;
 import ru.practicum.explore_with_me.validation.EventValidation;
 
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
-    private final EventRepository eventRepository;
     private final CompilationMapper compilationMapper;
     private final CompilationValidation compilationValidation;
     private final EventValidation eventValidation;
@@ -39,16 +37,17 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto findById(Long compId) {
-        compilationValidation.compilationIdValidation(compId);
+        Compilation compilation = compilationValidation.compilationIdValidation(compId);
         log.info("Compilation id {} found", compId);
-        return compilationMapper.toCompilationDto(compilationRepository.findById(compId).get());
+        return compilationMapper.toCompilationDto(compilation);
     }
 
     @Override
     public CompilationDto add(NewCompilationDto newCompilationDto) {
+        Compilation compilation = compilationMapper.fromNewCompilationDto(newCompilationDto);
+        Compilation savedCompilation = compilationRepository.save(compilation);
         log.info("Compilation added");
-        return compilationMapper.toCompilationDto(compilationRepository.save(compilationMapper
-                .fromNewCompilationDto(newCompilationDto)));
+        return compilationMapper.toCompilationDto(savedCompilation);
     }
 
     @Override
@@ -60,10 +59,8 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void deleteEventFromCompilation(Long compId, Long eventId) {
-        eventValidation.eventIdValidation(eventId);
-        compilationValidation.compilationIdValidation(compId);
-        Event event = eventRepository.findById(eventId).get();
-        Compilation compilation = compilationRepository.findById(compId).get();
+        Event event = eventValidation.eventIdValidation(eventId);
+        Compilation compilation = compilationValidation.compilationIdValidation(compId);
         compilation.getEvents().remove(event);
         compilationRepository.save(compilation);
         log.info("Event id {} deleted from compilation id {}", eventId, compId);
@@ -71,10 +68,8 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void addEventToCompilation(Long compId, Long eventId) {
-        eventValidation.eventIdValidation(eventId);
-        compilationValidation.compilationIdValidation(compId);
-        Event event = eventRepository.findById(eventId).get();
-        Compilation compilation = compilationRepository.findById(compId).get();
+        Event event = eventValidation.eventIdValidation(eventId);
+        Compilation compilation = compilationValidation.compilationIdValidation(compId);
         compilation.getEvents().add(event);
         compilationRepository.save(compilation);
         log.info("Event id {} added to compilation id {}", eventId, compId);
@@ -82,8 +77,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void pin(Long compId) {
-        compilationValidation.compilationIdValidation(compId);
-        Compilation compilation = compilationRepository.findById(compId).get();
+        Compilation compilation = compilationValidation.compilationIdValidation(compId);
         compilation.setPinned(true);
         compilationRepository.save(compilation);
         log.info("Compilation id {} pinned", compId);
@@ -91,8 +85,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public void unpin(Long compId) {
-        compilationValidation.compilationIdValidation(compId);
-        Compilation compilation = compilationRepository.findById(compId).get();
+        Compilation compilation = compilationValidation.compilationIdValidation(compId);
         compilation.setPinned(false);
         compilationRepository.save(compilation);
         log.info("Compilation id {} unpinned", compId);

@@ -6,7 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore_with_me.dto.NewUserDto;
 import ru.practicum.explore_with_me.dto.UserDto;
+import ru.practicum.explore_with_me.dto.UserShortDto;
 import ru.practicum.explore_with_me.mapper.UserMapper;
+import ru.practicum.explore_with_me.model.User;
 import ru.practicum.explore_with_me.repository.UserRepository;
 import ru.practicum.explore_with_me.validation.UserValidation;
 
@@ -24,8 +26,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto add(NewUserDto newUserDto) {
+        User user = userMapper.fromNewUserDto(newUserDto);
+        User savedUser = userRepository.save(user);
         log.info("User added");
-        return userMapper.toUserDto(userRepository.save(userMapper.fromNewUserDto(newUserDto)));
+        return userMapper.toUserDto(savedUser);
     }
 
     @Override
@@ -50,5 +54,11 @@ public class UserServiceImpl implements UserService {
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public UserShortDto findById(Long id) {
+        User user = userValidation.userIdValidation(id);
+        return userMapper.toUserShortDto(user);
     }
 }

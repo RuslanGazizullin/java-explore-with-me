@@ -72,14 +72,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateByUser(EventUpdateDto eventUpdateDto, Long userId) {
-        eventValidation.eventForUpdateValidation(eventUpdateDto.getEventId(), userId);
+        Long eventId = eventUpdateDto.getEventId();
+        eventValidation.eventForUpdateValidation(eventId, userId);
         Event event = eventMapper.fromEventUpdateDto(eventUpdateDto);
-        eventValidation.eventDateValidation(event.getEventDate());
-        if (eventRepository.findById(eventUpdateDto.getEventId()).get().getState().equals(EventState.CANCELED)) {
+        if (event.getState().equals(EventState.CANCELED)) {
             event.setState(EventState.PENDING);
         }
-        log.info("Event id {} updated by user id {}", eventUpdateDto.getEventId(), userId);
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        Event savedEvent = eventRepository.save(event);
+        log.info("Event id {} updated by user id {}", eventId, userId);
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override
@@ -87,26 +88,27 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.fromNewEventDto(newEventDto);
         eventValidation.eventDateValidation(event.getEventDate());
         event.setInitiator(userId);
+        Event savedEvent = eventRepository.save(event);
         log.info("Event added by user id {}", userId);
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override
     public EventFullDto findByIdByUser(Long userId, Long eventId) {
-        eventValidation.eventIdValidation(eventId);
+        Event event = eventValidation.eventIdAndInitiatorValidation(eventId, userId);
         log.info("Event id {} found by user id {}", eventId, userId);
-        return eventMapper.toEventFullDto(eventRepository.findByIdAndInitiator(eventId, userId));
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
     public EventFullDto cancelByUser(Long userId, Long eventId) {
-        eventValidation.eventIdValidation(eventId);
-        Event event = eventRepository.findByIdAndInitiator(eventId, userId);
+        Event event = eventValidation.eventIdAndInitiatorValidation(eventId, userId);
         if (event.getState().equals(EventState.PENDING)) {
             event.setState(EventState.CANCELED);
         }
+        Event savedEvent = eventRepository.save(event);
         log.info("Event id {} canceled by user id {}", eventId, userId);
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override
@@ -132,27 +134,38 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateByAdmin(Long eventId, EventUpdateAdminDto eventUpdateAdminDto) {
+        Event event = eventMapper.fromEventUpdateAdminDto(eventUpdateAdminDto, eventId);
+        Event savedEvent = eventRepository.save(event);
         log.info("Event id {} updated by admin", eventId);
-        return eventMapper.toEventFullDto(eventRepository.save(eventMapper
-                .fromEventUpdateAdminDto(eventUpdateAdminDto, eventId)));
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override
     public EventFullDto publishByAdmin(Long eventId) {
-        eventValidation.publishEventValidation(eventId);
-        Event event = eventRepository.findById(eventId).get();
+        Event event = eventValidation.publishEventValidation(eventId);
         event.setPublishedOn(LocalDateTime.now());
         event.setState(EventState.PUBLISHED);
+        Event savedEvent = eventRepository.save(event);
         log.info("Event id {} published by admin", eventId);
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override
     public EventFullDto rejectByAdmin(Long eventId) {
-        eventValidation.rejectEventValidation(eventId);
-        Event event = eventRepository.findById(eventId).get();
+        Event event = eventValidation.rejectEventValidation(eventId);
         event.setState(EventState.CANCELED);
+        Event savedEvent = eventRepository.save(event);
         log.info("Event id {} rejected by admin", eventId);
-        return eventMapper.toEventFullDto(eventRepository.save(event));
+        return eventMapper.toEventFullDto(savedEvent);
+    }
+
+    @Override
+    public List<Event> findAll() {
+        return eventRepository.findAll();
+    }
+
+    @Override
+    public Event findByIdForMapper(Long id) {
+        return eventValidation.eventIdValidation(id);
     }
 }

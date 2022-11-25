@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.explore_with_me.dto.CategoryDto;
 import ru.practicum.explore_with_me.dto.NewCategoryDto;
 import ru.practicum.explore_with_me.mapper.CategoryMapper;
+import ru.practicum.explore_with_me.model.Category;
 import ru.practicum.explore_with_me.repository.CategoryRepository;
 import ru.practicum.explore_with_me.validation.CategoryValidation;
 
@@ -33,22 +34,27 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto findById(Long catId) {
-        categoryValidation.categoryIdValidation(catId);
+        Category category = categoryValidation.categoryIdValidation(catId);
         log.info("Category id {} found", catId);
-        return categoryMapper.toCategoryDto(categoryRepository.findById(catId).get());
+        return categoryMapper.toCategoryDto(category);
     }
 
     @Override
     public CategoryDto add(NewCategoryDto newCategoryDto) {
         log.info("Category added");
-        return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.fromNewCategoryDto(newCategoryDto)));
+        Category category = categoryMapper.fromNewCategoryDto(newCategoryDto);
+        Category savedCategory = categoryRepository.save(category);
+        return categoryMapper.toCategoryDto(savedCategory);
     }
 
     @Override
     public CategoryDto update(CategoryDto categoryDto) {
-        categoryValidation.categoryIdValidation(categoryDto.getId());
-        log.info("Category id {} updated", categoryDto.getId());
-        return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.fromCategoryDto(categoryDto)));
+        Long catId = categoryDto.getId();
+        categoryValidation.categoryIdValidation(catId);
+        Category category = categoryMapper.fromCategoryDto(categoryDto);
+        Category savedCategory = categoryRepository.save(category);
+        log.info("Category id {} updated", catId);
+        return categoryMapper.toCategoryDto(savedCategory);
     }
 
     @Override

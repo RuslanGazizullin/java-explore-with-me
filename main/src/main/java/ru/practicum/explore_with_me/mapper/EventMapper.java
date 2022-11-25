@@ -8,7 +8,8 @@ import ru.practicum.explore_with_me.dto.*;
 import ru.practicum.explore_with_me.model.Event;
 import ru.practicum.explore_with_me.model.EventState;
 import ru.practicum.explore_with_me.model.RequestStatus;
-import ru.practicum.explore_with_me.repository.*;
+import ru.practicum.explore_with_me.service.*;
+import ru.practicum.explore_with_me.validation.EventValidation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,19 +20,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventMapper {
 
-    private final LocationRepository locationRepository;
-    private final LocationMapper locationMapper;
-    private final CategoryRepository categoryRepository;
-    private final CategoryMapper categoryMapper;
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-    private final ParticipationRequestRepository participationRequestRepository;
-    private final EventRepository eventRepository;
+    private final LocationService locationService;
+    private final CategoryService categoryService;
+    private final UserService userService;
+    private final ParticipationRequestService requestService;
+    private final EventValidation eventValidation;
     private final StatsClient statsClient;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Event fromNewEventDto(NewEventDto newEventDto) {
-        Long location = locationRepository.save(locationMapper.fromLocationDto(newEventDto.getLocation())).getId();
+        Long location = locationService.add(newEventDto.getLocation()).getId();
         return Event
                 .builder()
                 .annotation(newEventDto.getAnnotation())
@@ -49,7 +47,7 @@ public class EventMapper {
     }
 
     public Event fromEventUpdateAdminDto(EventUpdateAdminDto dto, Long oldEvenId) {
-        Event oldEvent = eventRepository.findById(oldEvenId).get();
+        Event oldEvent = eventValidation.eventIdValidation(oldEvenId);
         return Event
                 .builder()
                 .id(oldEvenId)
@@ -60,8 +58,8 @@ public class EventMapper {
                 .eventDate(dto.getEventDate() != null ? LocalDateTime.parse(dto.getEventDate(), FORMATTER)
                         : oldEvent.getEventDate())
                 .initiator(oldEvent.getInitiator())
-                .location(dto.getLocation() != null ? locationRepository.save(locationMapper
-                        .fromLocationDto(dto.getLocation())).getId() : oldEvent.getLocation())
+                .location(dto.getLocation() != null ? locationService.add(dto.getLocation()).getId()
+                        : oldEvent.getLocation())
                 .paid(dto.getPaid() != null ? dto.getPaid() : oldEvent.getPaid())
                 .participantLimit(dto.getParticipantLimit() != null ? dto.getParticipantLimit()
                         : oldEvent.getParticipantLimit())
@@ -74,7 +72,7 @@ public class EventMapper {
     }
 
     public Event fromEventUpdateDto(EventUpdateDto dto) {
-        Event event = eventRepository.findById(dto.getEventId()).get();
+        Event event = eventValidation.eventIdValidation(dto.getEventId());
         return Event
                 .builder()
                 .id(dto.getEventId())
@@ -99,14 +97,13 @@ public class EventMapper {
                 .builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
-                .category(categoryMapper.toCategoryDto(categoryRepository.findById(event.getCategory()).get()))
+                .category(categoryService.findById(event.getCategory()))
                 .eventDate(event.getEventDate().format(FORMATTER))
-                .initiator(userMapper.toUserShortDto(userRepository.findById(event.getInitiator()).get()))
+                .initiator(userService.findById(event.getInitiator()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
                 .views(getViews(event.getId()))
-                .confirmedRequests(participationRequestRepository
-                        .findAllByEventAndStatus(event.getId(), RequestStatus.CONFIRMED).size())
+                .confirmedRequests(requestService.findAllByEventAndStatus(event.getId(), RequestStatus.CONFIRMED).size())
                 .build();
     }
 
@@ -115,12 +112,12 @@ public class EventMapper {
                 .builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
-                .category(categoryMapper.toCategoryDto(categoryRepository.findById(event.getCategory()).get()))
+                .category(categoryService.findById(event.getCategory()))
                 .createdOn(event.getCreatedOn().format(FORMATTER))
                 .description(event.getDescription())
                 .eventDate(event.getEventDate().format(FORMATTER))
-                .initiator(userMapper.toUserShortDto(userRepository.findById(event.getInitiator()).get()))
-                .location(locationMapper.toLocationDto(locationRepository.findById(event.getLocation()).get()))
+                .initiator(userService.findById(event.getInitiator()))
+                .location(locationService.findById(event.getLocation()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(event.getPublishedOn() == null ? null : event.getPublishedOn().format(FORMATTER))
@@ -128,8 +125,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .state(event.getState())
                 .views(getViews(event.getId()))
-                .confirmedRequests(participationRequestRepository
-                        .findAllByEventAndStatus(event.getId(), RequestStatus.CONFIRMED).size())
+                .confirmedRequests(requestService.findAllByEventAndStatus(event.getId(), RequestStatus.CONFIRMED).size())
                 .build();
     }
 

@@ -10,6 +10,7 @@ import ru.practicum.explore_with_me.model.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -38,7 +39,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Page<Event> findAllByInitiator(Pageable pageable, Long initiator);
 
-    Event findByIdAndInitiator(Long id, Long initiator);
+    Optional<Event> findByIdAndInitiator(Long id, Long initiator);
 
     List<Long> findAllByCategory(Long category);
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.explore_with_me.dto.CompilationDto;
 import ru.practicum.explore_with_me.dto.NewCompilationDto;
 import ru.practicum.explore_with_me.model.Compilation;
-import ru.practicum.explore_with_me.repository.EventRepository;
+import ru.practicum.explore_with_me.service.EventService;
 
 import java.util.stream.Collectors;
 
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Component
 public class CompilationMapper {
 
-    private final EventRepository eventRepository;
+    private final EventService eventService;
     private final EventMapper eventMapper;
 
     public CompilationDto toCompilationDto(Compilation compilation) {
@@ -22,7 +22,7 @@ public class CompilationMapper {
                 .id(compilation.getId())
                 .pinned(compilation.getPinned())
                 .title(compilation.getTitle())
-                .events(eventRepository.findAll()
+                .events(eventService.findAll()
                         .stream()
                         .filter(event -> compilation.getEvents().contains(event))
                         .map(eventMapper::toEventShortDto)
@@ -32,7 +32,7 @@ public class CompilationMapper {
 
     public Compilation fromNewCompilationDto(NewCompilationDto newCompilationDto) {
         return Compilation.builder()
-                .events(eventRepository.findAll()
+                .events(eventService.findAll()
                         .stream()
                         .filter(event -> newCompilationDto.getEvents().contains(event.getId()))
                         .collect(Collectors.toList()))

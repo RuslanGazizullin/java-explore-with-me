@@ -1,6 +1,7 @@
 package ru.practicum.explore_with_me.service;
 
 import ru.practicum.explore_with_me.dto.*;
+import ru.practicum.explore_with_me.model.Event;
 
 import java.util.List;
 
@@ -28,4 +29,8 @@ public interface EventService {
     EventFullDto publishByAdmin(Long eventId);
 
     EventFullDto rejectByAdmin(Long eventId);
+
+    List<Event> findAll();
+
+    Event findByIdForMapper(Long id);
 }

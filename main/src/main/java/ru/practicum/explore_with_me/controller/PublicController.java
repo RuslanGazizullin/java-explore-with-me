@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore_with_me.client.StatsClient;
-import ru.practicum.explore_with_me.dto.CategoryDto;
-import ru.practicum.explore_with_me.dto.CompilationDto;
-import ru.practicum.explore_with_me.dto.EventFullDto;
-import ru.practicum.explore_with_me.dto.EventShortDto;
+import ru.practicum.explore_with_me.dto.*;
 import ru.practicum.explore_with_me.service.CategoryService;
+import ru.practicum.explore_with_me.service.CommentService;
 import ru.practicum.explore_with_me.service.CompilationService;
 import ru.practicum.explore_with_me.service.EventService;
 
@@ -26,6 +24,7 @@ public class PublicController {
     private final CategoryService categoryService;
     private final CompilationService compilationService;
     private final EventService eventService;
+    private final CommentService commentService;
     private final StatsClient statsClient;
 
     @GetMapping("/events")
@@ -70,5 +69,19 @@ public class PublicController {
     @GetMapping("/categories/{catId}")
     public CategoryDto findCategoryById(@PathVariable Long catId) {
         return categoryService.findById(catId);
+    }
+
+    @GetMapping("/comments")
+    public List<CommentFullDto> findAllComments(@RequestParam String text,
+                                                @RequestParam(required = false) String rangeStart,
+                                                @RequestParam(required = false) String rangeEnd,
+                                                @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                @Positive @RequestParam(defaultValue = "100") Integer size) {
+        return commentService.findAll(text, rangeStart, rangeEnd, from, size);
+    }
+
+    @GetMapping("/comments/{commentId}")
+    public CommentFullDto findCommentById(@PathVariable Long commentId) {
+        return commentService.findById(commentId);
     }
 }

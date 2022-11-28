@@ -158,6 +158,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentFullDto publish(Long commentId) {
         Comment comment = commentValidation.commentIdValidation(commentId);
         comment.setStatus(CommentStatus.PUBLISHED);
+        comment.setPublishedOn(LocalDateTime.now());
         Comment publishedComment = commentRepository.save(comment);
         log.info("Comment {} published", commentId);
         return commentMapper.toCommentFullDto(publishedComment);

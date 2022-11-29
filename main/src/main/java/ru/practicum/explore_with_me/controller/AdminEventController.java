@@ -3,7 +3,7 @@ package ru.practicum.explore_with_me.controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore_with_me.dto.EventFullDto;
-import ru.practicum.explore_with_me.dto.EventUpdateAdminDto;
+import ru.practicum.explore_with_me.dto.EventUpdateDto;
 import ru.practicum.explore_with_me.service.EventService;
 
 import javax.validation.constraints.Positive;
@@ -33,8 +33,8 @@ public class AdminEventController {
     }
 
     @PutMapping("/{eventId}")
-    public EventFullDto update(@RequestBody EventUpdateAdminDto eventUpdateAdminDto, @PathVariable Long eventId) {
-        return eventService.updateByAdmin(eventId, eventUpdateAdminDto);
+    public EventFullDto update(@RequestBody EventUpdateDto eventUpdateDto, @PathVariable Long eventId) {
+        return eventService.updateByAdmin(eventId, eventUpdateDto);
     }
 
     @PatchMapping("/{eventId}/publish")

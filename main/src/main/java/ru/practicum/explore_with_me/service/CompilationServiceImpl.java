@@ -10,6 +10,7 @@ import ru.practicum.explore_with_me.mapper.CompilationMapper;
 import ru.practicum.explore_with_me.model.Compilation;
 import ru.practicum.explore_with_me.model.Event;
 import ru.practicum.explore_with_me.repository.CompilationRepository;
+import ru.practicum.explore_with_me.repository.EventRepository;
 import ru.practicum.explore_with_me.validation.CompilationValidation;
 import ru.practicum.explore_with_me.validation.EventValidation;
 
@@ -25,6 +26,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final CompilationMapper compilationMapper;
     private final CompilationValidation compilationValidation;
     private final EventValidation eventValidation;
+    private final EventRepository eventRepository;
 
     @Override
     public List<CompilationDto> findAll(Boolean pinned, Integer from, Integer size) {
@@ -45,6 +47,10 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto add(NewCompilationDto newCompilationDto) {
         Compilation compilation = compilationMapper.fromNewCompilationDto(newCompilationDto);
+        compilation.setEvents(eventRepository.findAll()
+                .stream()
+                .filter(event -> newCompilationDto.getEvents().contains(event.getId()))
+                .collect(Collectors.toList()));
         Compilation savedCompilation = compilationRepository.save(compilation);
         log.info("Compilation added");
         return compilationMapper.toCompilationDto(savedCompilation);

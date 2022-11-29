@@ -16,48 +16,36 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("select e from Event e " +
-            "where (upper(e.annotation) like upper(concat('%', ?1, '%')) " +
+            "where (?1 is null " +
+            "or upper(e.annotation) like upper(concat('%', ?1, '%')) " +
             "or upper(e.description) like upper(concat('%', ?1, '%')))" +
-            "and e.category in ?2 " +
-            "and e.paid = ?3 " +
-            "and e.eventDate >= ?4 " +
-            "and e.eventDate <= ?5 " +
+            "and (?2 is null or e.category in ?2) " +
+            "and (?3 is null or e.paid = ?3) " +
+            "and (e.eventDate >= ?4) " +
+            "and (cast(?5 as date) is null or e.eventDate <= ?5) " +
             "order by e.eventDate")
     Page<Event> findAll(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
                         LocalDateTime rangeEnd, Pageable pageable);
 
-    @Query("select e from Event e " +
-            "where (upper(e.annotation) like upper(concat('%', ?1, '%')) " +
-            "or upper(e.description) like upper(concat('%', ?1, '%')))" +
-            "and e.category in ?2 " +
-            "and e.paid = ?3 " +
-            "and e.eventDate >= ?4 " +
-            "order by e.eventDate")
-    Page<Event> findAll(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, Pageable pageable);
-
     Event findByIdAndState(Long id, EventState state);
 
-    Page<Event> findAllByInitiator(Pageable pageable, Long initiator);
+    @Query("select e from Event e where e.initiator.id=?1 ")
+    Page<Event> findAllByInitiator(Long initiator, Pageable pageable);
 
+    @Query("select e from Event e where e.id = ?1 and e.initiator.id = ?2 ")
     Optional<Event> findByIdAndInitiator(Long id, Long initiator);
 
+    @Query("select e from Event e where e.category.id = ?1 ")
     List<Long> findAllByCategory(Long category);
 
-    @Query("select e.id from Event e where e.initiator = ?1")
+    @Query("select e.id from Event e where e.initiator.id = ?1")
     List<Long> findAllIdByInitiator(Long initiator);
 
     @Query("select e from Event e " +
-            "where e.initiator in ?1 " +
-            "and e.category in ?2 " +
-            "and e.eventDate>=?3 " +
-            "and e.eventDate<=?4")
+            "where (?1 is null or e.initiator in ?1) " +
+            "and (?2 is null or e.category in ?2) " +
+            "and (e.eventDate>=?3) " +
+            "and (cast(?4 as date) is null or e.eventDate<=?4) ")
     Page<Event> findAllByAdmin(List<Long> users, List<Long> category, LocalDateTime rangeStart,
                                LocalDateTime rangeEnd, Pageable pageable);
-
-    @Query("select e from Event e " +
-            "where e.initiator in ?1 " +
-            "and e.category in ?2 " +
-            "and e.eventDate>=?3 ")
-    Page<Event> findAllByAdmin(List<Long> users, List<Long> category, LocalDateTime rangeStart,
-                               Pageable pageable);
 }

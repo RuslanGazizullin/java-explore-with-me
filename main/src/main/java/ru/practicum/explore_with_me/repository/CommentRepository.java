@@ -14,48 +14,27 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("select c from Comment c " +
-            "where c.author=?1 " +
-            "and c.eventId in ?2 " +
-            "and c.createdOn >= ?3 " +
-            "and c.createdOn <= ?4 " +
+            "where (?1 is null or c.author.id = ?1) " +
+            "and (?2 is null or c.event.id in ?2) " +
+            "and (c.createdOn >= ?3) " +
+            "and (cast(?4 as date) is null or c.createdOn <= ?4) " +
             "order by c.createdOn")
     Page<Comment> findAllByAuthor(Long author, List<Long> events, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                   Pageable pageable);
 
     @Query("select c from Comment c " +
-            "where c.author=?1 " +
-            "and c.eventId in ?2 " +
-            "and c.createdOn >= ?3 " +
-            "order by c.createdOn")
-    Page<Comment> findAllByAuthor(Long author, List<Long> events, LocalDateTime rangeStart, Pageable pageable);
-
-    @Query("select c from Comment c " +
-            "where c.author in ?1 " +
-            "and c.eventId in ?2 " +
-            "and c.createdOn >= ?3 " +
-            "and c.createdOn <= ?4 " +
+            "where (?1 is null or c.author.id in ?1) " +
+            "and (?2 is null or c.event.id in ?2) " +
+            "and (c.createdOn >= ?3) " +
+            "and (cast(?4 as date) is null or c.createdOn <= ?4) " +
             "order by c.createdOn")
     Page<Comment> findAll(List<Long> authors, List<Long> events, LocalDateTime rangeStart,
                           LocalDateTime rangeEnd, Pageable pageable);
 
     @Query("select c from Comment c " +
-            "where c.author in ?1 " +
-            "and c.eventId in ?2 " +
-            "and c.createdOn >= ?3 " +
-            "order by c.createdOn")
-    Page<Comment> findAll(List<Long> authors, List<Long> events, LocalDateTime rangeStart,
-                          Pageable pageable);
-
-    @Query("select c from Comment c " +
             "where upper(c.text) like upper(concat('%', ?1, '%')) " +
-            "and c.createdOn >= ?2 " +
-            "and c.createdOn <= ?3 " +
+            "and (c.createdOn >= ?2) " +
+            "and (cast(?3 as date) is null or c.createdOn <= ?3) " +
             "order by c.createdOn")
     Page<Comment> findAll(String text, LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
-
-    @Query("select c from Comment c " +
-            "where upper(c.text) like upper(concat('%', ?1, '%')) " +
-            "and c.createdOn >= ?2 " +
-            "order by c.createdOn")
-    Page<Comment> findAll(String text, LocalDateTime rangeStart, Pageable pageable);
 }

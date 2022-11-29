@@ -25,7 +25,7 @@ public class CommentValidation {
 
     public Comment commentAuthorValidation(Long commentId, Long userId) {
         Comment comment = commentIdValidation(commentId);
-        if (!comment.getAuthor().equals(userId)) {
+        if (!comment.getAuthor().getId().equals(userId)) {
             throw new ValidationException("User isn't author");
         }
         return comment;

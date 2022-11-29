@@ -20,11 +20,13 @@ public class Comment {
     @Column(name = "id")
     private Long id;
     @NotNull
-    @Column(name = "event_id")
-    private Long eventId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
+    private Event event;
     @NotNull
-    @Column(name = "author")
-    private Long author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author")
+    private User author;
     @NotBlank
     @Column(name = "text")
     private String text;

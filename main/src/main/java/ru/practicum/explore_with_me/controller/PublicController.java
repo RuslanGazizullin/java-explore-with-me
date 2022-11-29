@@ -28,9 +28,9 @@ public class PublicController {
     private final StatsClient statsClient;
 
     @GetMapping("/events")
-    public List<EventShortDto> findAllEvents(@RequestParam String text,
-                                             @RequestParam List<Long> categories,
-                                             @RequestParam Boolean paid,
+    public List<EventShortDto> findAllEvents(@RequestParam(required = false) String text,
+                                             @RequestParam(required = false) List<Long> categories,
+                                             @RequestParam(required = false) Boolean paid,
                                              @RequestParam(required = false) String rangeStart,
                                              @RequestParam(required = false) String rangeEnd,
                                              @RequestParam(defaultValue = "false") Boolean onlyAvailable,

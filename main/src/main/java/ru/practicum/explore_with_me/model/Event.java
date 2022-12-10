@@ -20,18 +20,21 @@ public class Event {
     private Long id;
     @Column(name = "annotation")
     private String annotation;
-    @Column(name = "category")
-    private Long category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category")
+    private Category category;
     @Column(name = "created_on")
     private LocalDateTime createdOn;
     @Column(name = "description")
     private String description;
     @Column(name = "event_date")
     private LocalDateTime eventDate;
-    @Column(name = "initiator")
-    private Long initiator;
-    @Column(name = "location")
-    private Long location;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "initiator")
+    private User initiator;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location")
+    private Location location;
     @Column(name = "paid")
     private Boolean paid;
     @Column(name = "participant_limit")

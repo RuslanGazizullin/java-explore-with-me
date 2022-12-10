@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import ru.practicum.explore_with_me.dto.ParticipationRequestDto;
 import ru.practicum.explore_with_me.model.ParticipationRequest;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -18,16 +17,6 @@ public class ParticipationRequestMapper {
                 .event(participationRequest.getEvent())
                 .requester(participationRequest.getRequester())
                 .status(participationRequest.getStatus())
-                .build();
-    }
-
-    public ParticipationRequest fromParticipationRequestDto(ParticipationRequestDto participationRequestDto) {
-        return ParticipationRequest.builder()
-                .id(participationRequestDto.getId())
-                .created(LocalDateTime.parse(participationRequestDto.getCreated(), FORMATTER))
-                .event(participationRequestDto.getEvent())
-                .requester(participationRequestDto.getRequester())
-                .status(participationRequestDto.getStatus())
                 .build();
     }
 }

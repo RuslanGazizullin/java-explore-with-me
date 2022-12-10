@@ -23,7 +23,8 @@ public class Compilation {
     @Column(name = "title")
     private String title;
     @ManyToMany
-    @JoinTable(name = "compilations_events", joinColumns = @JoinColumn(name = "compilation"),
+    @JoinTable(name = "compilations_events",
+            joinColumns = @JoinColumn(name = "compilation"),
             inverseJoinColumns = @JoinColumn(name = "event"))
     private List<Event> events;
 }

@@ -50,21 +50,21 @@ public class EventValidation {
     }
 
     public void eventInitiatorValidation(Event event, Long userId) {
-        if (!event.getInitiator().equals(userId)) {
+        if (!event.getInitiator().getId().equals(userId)) {
             throw new ValidationException("User isn't event's initiator");
         }
     }
 
     public Event eventInitiatorForRequestValidation(Long eventId, Long userId) {
         Event event = eventIdValidation(eventId);
-        if (!event.getInitiator().equals(userId)) {
+        if (!event.getInitiator().getId().equals(userId)) {
             throw new ValidationException("User isn't event's initiator");
         }
         return event;
     }
 
     public void addRequestEventInitiatorValidation(Event event, Long userId) {
-        if (event.getInitiator().equals(userId)) {
+        if (event.getInitiator().getId().equals(userId)) {
             throw new ValidationException("User is event's initiator");
         }
     }
@@ -101,11 +101,12 @@ public class EventValidation {
         return event;
     }
 
-    public void eventForUpdateValidation(Long eventId, Long userId) {
+    public Event eventForUpdateValidation(Long eventId, Long userId) {
         Event event = eventIdValidation(eventId);
         eventStateForUpdateValidation(event);
         eventDateValidation(event.getEventDate());
         eventInitiatorValidation(event, userId);
+        return event;
     }
 
     public Event addRequestForEventValidation(Long eventId, Long userId) {

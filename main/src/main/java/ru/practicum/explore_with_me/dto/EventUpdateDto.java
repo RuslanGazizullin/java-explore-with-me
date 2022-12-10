@@ -13,7 +13,9 @@ public class EventUpdateDto {
     private Long category;
     private String description;
     private String eventDate;
+    private LocationDto location;
     private Boolean paid;
     private Long participantLimit;
+    private Boolean requestModeration;
     private String title;
 }

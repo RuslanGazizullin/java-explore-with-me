@@ -9,7 +9,10 @@ import ru.practicum.explore_with_me.mapper.EventMapper;
 import ru.practicum.explore_with_me.model.Event;
 import ru.practicum.explore_with_me.model.EventState;
 import ru.practicum.explore_with_me.repository.EventRepository;
+import ru.practicum.explore_with_me.repository.LocationRepository;
+import ru.practicum.explore_with_me.validation.CategoryValidation;
 import ru.practicum.explore_with_me.validation.EventValidation;
+import ru.practicum.explore_with_me.validation.UserValidation;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,29 +26,24 @@ import java.util.stream.Collectors;
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
+    private final LocationRepository locationRepository;
     private final EventMapper eventMapper;
     private final EventValidation eventValidation;
+    private final CategoryValidation categoryValidation;
+    private final UserValidation userValidation;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public List<EventShortDto> findAll(String text, List<Long> categories, Boolean paid, String rangeStart,
                                        String rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size) {
-        List<EventShortDto> events;
-        if (rangeStart != null && rangeEnd != null) {
-            events = eventRepository.findAll(text, categories, paid, LocalDateTime.parse(rangeStart, FORMATTER),
-                            LocalDateTime.parse(rangeEnd, FORMATTER), PageRequest.of(from / size, size))
-                    .stream()
-                    .filter(event -> event.getState().equals(EventState.PUBLISHED))
-                    .map(eventMapper::toEventShortDto)
-                    .collect(Collectors.toList());
-        } else {
-            events = eventRepository.findAll(text, categories, paid, LocalDateTime.now(),
-                            PageRequest.of(from / size, size))
-                    .stream()
-                    .filter(event -> event.getState().equals(EventState.PUBLISHED))
-                    .map(eventMapper::toEventShortDto)
-                    .collect(Collectors.toList());
-        }
+        LocalDateTime start = rangeStart == null ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, FORMATTER);
+        LocalDateTime end = rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, FORMATTER);
+        List<EventShortDto> events = eventRepository.findAll(text, categories, paid, start, end,
+                        PageRequest.of(from / size, size))
+                .stream()
+                .filter(event -> event.getState().equals(EventState.PUBLISHED))
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
         if (sort.equals("VIEWS")) {
             events = events.stream().sorted(Comparator.comparing(EventShortDto::getViews)).collect(Collectors.toList());
         }
@@ -63,9 +61,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> findAllByUser(Long userId, Integer from, Integer size) {
         log.info("All event by user id {} found", userId);
-        return eventRepository.findAllByInitiator(PageRequest.of(from / size, size), userId)
+        return eventRepository.findAllByInitiator(userId, PageRequest.of(from / size, size))
                 .stream()
-                .filter(event -> event.getInitiator().equals(userId))
                 .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
     }
@@ -73,8 +70,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateByUser(EventUpdateDto eventUpdateDto, Long userId) {
         Long eventId = eventUpdateDto.getEventId();
-        eventValidation.eventForUpdateValidation(eventId, userId);
-        Event event = eventMapper.fromEventUpdateDto(eventUpdateDto);
+        Event oldEvent = eventValidation.eventForUpdateValidation(eventId, userId);
+        Event event = eventMapper.fromEventUpdateDto(eventUpdateDto, oldEvent);
+        event.setCategory(eventUpdateDto.getCategory() == null ? oldEvent.getCategory()
+                : categoryValidation.categoryIdValidation(eventUpdateDto.getCategory()));
         if (event.getState().equals(EventState.CANCELED)) {
             event.setState(EventState.PENDING);
         }
@@ -86,8 +85,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto addByUser(NewEventDto newEventDto, Long userId) {
         Event event = eventMapper.fromNewEventDto(newEventDto);
+        locationRepository.save(event.getLocation());
+        event.setCategory(categoryValidation.categoryIdValidation(newEventDto.getCategory()));
         eventValidation.eventDateValidation(event.getEventDate());
-        event.setInitiator(userId);
+        event.setInitiator(userValidation.userIdValidation(userId));
         Event savedEvent = eventRepository.save(event);
         log.info("Event added by user id {}", userId);
         return eventMapper.toEventFullDto(savedEvent);
@@ -115,26 +116,21 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> findAllByAdmin(List<Long> users, List<String> states, List<Long> categories,
                                              String rangeStart, String rangeEnd, Integer from, Integer size) {
         log.info("All events found");
-        if (rangeStart != null && rangeEnd != null) {
-            return eventRepository.findAllByAdmin(users, categories, LocalDateTime.parse(rangeStart, FORMATTER),
-                            LocalDateTime.parse(rangeEnd, FORMATTER), PageRequest.of(from / size, size))
-                    .stream()
-                    .filter(event -> states.contains(event.getState().name()))
-                    .map(eventMapper::toEventFullDto)
-                    .collect(Collectors.toList());
-        } else {
-            return eventRepository.findAllByAdmin(users, categories, LocalDateTime.now(),
-                            PageRequest.of(from / size, size))
-                    .stream()
-                    .filter(event -> states.contains(event.getState().name()))
-                    .map(eventMapper::toEventFullDto)
-                    .collect(Collectors.toList());
-        }
+        LocalDateTime start = rangeStart == null ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, FORMATTER);
+        LocalDateTime end = rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, FORMATTER);
+        return eventRepository.findAllByAdmin(users, categories, start, end, PageRequest.of(from / size, size))
+                .stream()
+                .filter(event -> states.contains(event.getState().name()))
+                .map(eventMapper::toEventFullDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public EventFullDto updateByAdmin(Long eventId, EventUpdateAdminDto eventUpdateAdminDto) {
-        Event event = eventMapper.fromEventUpdateAdminDto(eventUpdateAdminDto, eventId);
+    public EventFullDto updateByAdmin(Long eventId, EventUpdateDto eventUpdateDto) {
+        Event oldEvent = eventValidation.eventIdValidation(eventId);
+        Event event = eventMapper.fromEventUpdateDto(eventUpdateDto, oldEvent);
+        event.setCategory(eventUpdateDto.getCategory() == null ? oldEvent.getCategory()
+                : categoryValidation.categoryIdValidation(eventUpdateDto.getCategory()));
         Event savedEvent = eventRepository.save(event);
         log.info("Event id {} updated by admin", eventId);
         return eventMapper.toEventFullDto(savedEvent);
@@ -157,15 +153,5 @@ public class EventServiceImpl implements EventService {
         Event savedEvent = eventRepository.save(event);
         log.info("Event id {} rejected by admin", eventId);
         return eventMapper.toEventFullDto(savedEvent);
-    }
-
-    @Override
-    public List<Event> findAll() {
-        return eventRepository.findAll();
-    }
-
-    @Override
-    public Event findByIdForMapper(Long id) {
-        return eventValidation.eventIdValidation(id);
     }
 }

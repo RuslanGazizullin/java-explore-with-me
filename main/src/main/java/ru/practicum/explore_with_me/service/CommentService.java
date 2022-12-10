@@ -22,8 +22,8 @@ public interface CommentService {
 
     CommentFullDto findById(Long commentId);
 
-    List<CommentFullDto> findAllByAdmin(List<Long> authors, List<Long> events, String rangeStart,
-                                        String rangeEnd, Integer from, Integer size);
+    List<CommentFullDto> findAllByAdmin(List<Long> authors, List<Long> events, List<String> statuses,
+                                        String rangeStart, String rangeEnd, Integer from, Integer size);
 
     CommentFullDto updateByAdmin(CommentDto commentDto, Long commentId);
 

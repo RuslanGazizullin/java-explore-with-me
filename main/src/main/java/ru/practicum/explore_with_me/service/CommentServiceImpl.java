@@ -68,14 +68,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentFullDto> findAllByUser(Long userId, List<Long> events, List<String> statuses, String rangeStart,
-                                              String rangeEnd, Integer from, Integer size) {
-        LocalDateTime start = rangeStart == null ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, FORMATTER);
+    public List<CommentFullDto> findAllByUser(Long userId, List<Long> events, List<String> statuses,
+                                              String rangeStart, String rangeEnd, Integer from, Integer size) {
+        LocalDateTime start = rangeStart == null ? LocalDateTime.now().minusDays(1)
+                : LocalDateTime.parse(rangeStart, FORMATTER);
         LocalDateTime end = rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, FORMATTER);
         log.info("All required comments found");
-        return commentRepository.findAllByAuthor(userId, events, start, end, PageRequest.of(from / size, size))
+        return commentRepository.findAllByAuthor(userId, events, statuses, start, end, PageRequest.of(from / size, size))
                 .stream()
-                .filter(comment -> statuses.contains(comment.getStatus().name()))
                 .map(commentMapper::toCommentFullDto)
                 .collect(Collectors.toList());
     }
@@ -89,7 +89,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentFullDto> findAll(String text, String rangeStart, String rangeEnd, Integer from, Integer size) {
-        LocalDateTime start = rangeStart == null ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, FORMATTER);
+        LocalDateTime start = rangeStart == null ? LocalDateTime.now().minusDays(1)
+                : LocalDateTime.parse(rangeStart, FORMATTER);
         LocalDateTime end = rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, FORMATTER);
         log.info("All required comments found");
         return commentRepository.findAll(text, start, end, PageRequest.of(from / size, size))
@@ -111,12 +112,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentFullDto> findAllByAdmin(List<Long> authors, List<Long> events, String rangeStart,
-                                               String rangeEnd, Integer from, Integer size) {
-        LocalDateTime start = rangeStart == null ? LocalDateTime.now() : LocalDateTime.parse(rangeStart, FORMATTER);
+    public List<CommentFullDto> findAllByAdmin(List<Long> authors, List<Long> events, List<String> statuses,
+                                               String rangeStart, String rangeEnd, Integer from, Integer size) {
+        LocalDateTime start = rangeStart == null ? LocalDateTime.now().minusDays(1)
+                : LocalDateTime.parse(rangeStart, FORMATTER);
         LocalDateTime end = rangeEnd == null ? null : LocalDateTime.parse(rangeEnd, FORMATTER);
         log.info("All required comments found by admin");
-        return commentRepository.findAll(authors, events, start, end, PageRequest.of(from / size, size))
+        return commentRepository.findAllByAdmin(authors, events, statuses, start, end, PageRequest.of(from / size, size))
                 .stream()
                 .map(commentMapper::toCommentFullDto)
                 .collect(Collectors.toList());

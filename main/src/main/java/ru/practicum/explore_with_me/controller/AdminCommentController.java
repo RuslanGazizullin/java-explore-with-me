@@ -23,14 +23,14 @@ public class AdminCommentController {
     }
 
     @GetMapping
-    public List<CommentFullDto> findAll(
-                                        @RequestParam(defaultValue = "[]") List<Long> authors,
-                                        @RequestParam(defaultValue = "[]") List<Long> events,
+    public List<CommentFullDto> findAll(@RequestParam(required = false) List<Long> authors,
+                                        @RequestParam(required = false) List<Long> events,
+                                        @RequestParam(required = false) List<String> statuses,
                                         @RequestParam(required = false) String rangeStart,
                                         @RequestParam(required = false) String rangeEnd,
                                         @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                         @Positive @RequestParam(defaultValue = "100") Integer size) {
-        return commentService.findAllByAdmin(authors, events, rangeStart, rangeEnd, from, size);
+        return commentService.findAllByAdmin(authors, events, statuses, rangeStart, rangeEnd, from, size);
     }
 
     @PutMapping("/{commentId}")

@@ -41,8 +41,8 @@ public class PrivateCommentController {
 
     @GetMapping
     public List<CommentFullDto> findAll(@PathVariable Long userId,
-                                        @RequestParam(defaultValue = "[]") List<Long> events,
-                                        @RequestParam(defaultValue = "[]") List<String> statuses,
+                                        @RequestParam(required = false) List<Long> events,
+                                        @RequestParam(required = false) List<String> statuses,
                                         @RequestParam(required = false) String rangeStart,
                                         @RequestParam(required = false) String rangeEnd,
                                         @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,

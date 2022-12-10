@@ -16,20 +16,22 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("select c from Comment c " +
             "where (?1 is null or c.author.id = ?1) " +
             "and (?2 is null or c.event.id in ?2) " +
-            "and (c.createdOn >= ?3) " +
-            "and (cast(?4 as date) is null or c.createdOn <= ?4) " +
+            "and (?3 is null or c.status in ?3) " +
+            "and (c.createdOn >= ?4) " +
+            "and (cast(?5 as date) is null or c.createdOn <= ?5) " +
             "order by c.createdOn")
-    Page<Comment> findAllByAuthor(Long author, List<Long> events, LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                  Pageable pageable);
+    Page<Comment> findAllByAuthor(Long author, List<Long> events, List<String> statuses,
+                                  LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
 
     @Query("select c from Comment c " +
             "where (?1 is null or c.author.id in ?1) " +
             "and (?2 is null or c.event.id in ?2) " +
-            "and (c.createdOn >= ?3) " +
-            "and (cast(?4 as date) is null or c.createdOn <= ?4) " +
+            "and (?3 is null or c.status in ?3) " +
+            "and (c.createdOn >= ?4) " +
+            "and (cast(?5 as date) is null or c.createdOn <= ?5) " +
             "order by c.createdOn")
-    Page<Comment> findAll(List<Long> authors, List<Long> events, LocalDateTime rangeStart,
-                          LocalDateTime rangeEnd, Pageable pageable);
+    Page<Comment> findAllByAdmin(List<Long> authors, List<Long> events, List<String> statuses,
+                                 LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
 
     @Query("select c from Comment c " +
             "where upper(c.text) like upper(concat('%', ?1, '%')) " +
